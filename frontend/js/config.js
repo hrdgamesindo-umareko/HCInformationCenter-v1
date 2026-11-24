@@ -8,7 +8,7 @@
  * MODE DEMO (data contoh, tanpa server) supaya tampilan bisa diuji.
  */
 var CONFIG = {
-  API_URL: 'PASTE_URL_WEB_APP_DISINI',
+  API_URL: 'https://script.google.com/macros/s/AKfycbyEOQxdwJDkxpEZQrv2XzD4nTGrfxFuOR1KA4JQqKVcnwOAPtF_sKuJAkZXs23pxB3E/exec',
   APP_NAME: 'HC Information Center',
-  COMPANY: 'PT Nama Perusahaan Anda'
+  COMPANY: 'MG'
 };
