@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07090f">
+  <title>HC Information Center</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Latar animatif: bola neon mengorbit (lihat js/motion.js) -->
+  <canvas id="bgCanvas" aria-hidden="true"></canvas>
+
+  <!-- ===== Header ===== -->
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="brand">
+        <span class="brand-logo">HC</span>
+        <div>
+          <h1 id="appTitle">HC Information Center</h1>
+          <p id="appCompany" class="brand-sub"></p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <a href="admin.html" class="btn btn-ghost" id="adminLink">Admin HRD</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== Banner demo ===== -->
+  <div id="demoBanner" class="demo-banner hidden">
+    MODE DEMO — data contoh. Ikuti README untuk menghubungkan backend Apps Script.
+  </div>
+
+  <!-- ===== Hero ===== -->
+  <section class="hero">
+    <span class="eyebrow">Portal Karyawan · HC</span>
+    <h2 class="hero-title">Satu Pusat untuk<br><span class="grad-text">Seluruh Informasi HC</span></h2>
+    <p class="hero-sub">Pengumuman resmi, memo &amp; surat edaran, program Learning &amp; Development,
+      agenda kegiatan, sampai HC Corner — semuanya mudah dicari dan selalu terbaru.</p>
+    <div class="hero-stats">
+      <div class="stat-chip"><b id="statTayang">–</b><span>Info Tayang</span></div>
+      <div class="stat-chip"><b id="statPinned">–</b><span>Di-pin</span></div>
+      <div class="stat-chip"><b>5</b><span>Kategori</span></div>
+    </div>
+  </section>
+
+  <!-- ===== Pencarian & filter kategori ===== -->
+  <section class="toolbar">
+    <div class="toolbar-inner">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="search" id="searchInput" placeholder="Cari pengumuman, memo, atau informasi lama...">
+      </div>
+      <nav class="category-tabs" id="categoryTabs" aria-label="Kategori informasi">
+        <button class="tab active" data-cat="">Semua</button>
+        <button class="tab" data-cat="Pengumuman">Pengumuman</button>
+        <button class="tab" data-cat="Memo &amp; Surat Edaran">Memo &amp; Surat Edaran</button>
+        <button class="tab" data-cat="Learning &amp; Development">Learning &amp; Development</button>
+        <button class="tab" data-cat="Kegiatan &amp; Agenda HC">Kegiatan &amp; Agenda HC</button>
+        <button class="tab" data-cat="HC Corner">HC Corner</button>
+      </nav>
+    </div>
+  </section>
+
+  <!-- ===== Daftar informasi ===== -->
+  <main class="container">
+    <p class="meta-line" id="resultMeta"></p>
+    <div id="infoList" class="card-grid" aria-live="polite"></div>
+    <div id="emptyState" class="empty-state hidden">
+      <div class="empty-icon">📭</div>
+      <h2>Belum ada informasi</h2>
+      <p id="emptyMsg">Tidak ada informasi tayang pada kategori ini.</p>
+    </div>
+    <div id="loadError" class="empty-state hidden">
+      <div class="empty-icon">⚠️</div>
+      <h2>Gagal memuat data</h2>
+      <p id="errorMsg"></p>
+    </div>
+  </main>
+
+  <footer class="app-footer">
+    <p id="footerText"></p>
+    <p class="footer-install">Tips: buka lewat Chrome/Edge di HP lalu pilih "Tambahkan ke layar utama" untuk memasang aplikasi (PWA).</p>
+  </footer>
+
+  <!-- ===== Modal detail ===== -->
+  <div class="modal-backdrop hidden" id="detailModal">
+    <div class="modal" role="dialog" aria-modal="true">
+      <div class="modal-head">
+        <h2 id="detailTitle"></h2>
+        <button class="icon-btn" id="closeDetail" aria-label="Tutup">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="badges" id="detailBadges"></div>
+        <div class="detail-meta" id="detailMeta"></div>
+        <div class="detail-isi" id="detailIsi"></div>
+        <div id="detailAttachments" class="attachments"></div>
+        <div id="readConfirmBox" class="read-confirm"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Modal konfirmasi baca ===== -->
+  <div class="modal-backdrop hidden" id="confirmModal">
+    <div class="modal modal-sm" role="dialog" aria-modal="true">
+      <div class="modal-head">
+        <h2>Konfirmasi Telah Membaca</h2>
+        <button class="icon-btn" id="closeConfirm" aria-label="Tutup">✕</button>
+      </div>
+      <div class="modal-body">
+        <p class="hint">Konfirmasi Anda dicatat sebagai bukti bahwa Anda telah membaca memo penting ini.</p>
+        <label class="field">
+          <span>Nama Lengkap</span>
+          <input type="text" id="confirmNama" maxlength="100" autocomplete="name">
+        </label>
+        <label class="field">
+          <span>NRP / Nomor Induk Karyawan</span>
+          <input type="text" id="confirmNrp" maxlength="50">
+        </label>
+        <p id="confirmError" class="error-msg hidden"></p>
+        <button class="btn btn-primary btn-block" id="btnSubmitConfirm">Kirim Konfirmasi</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/motion.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

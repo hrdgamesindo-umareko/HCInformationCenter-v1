@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07090f">
+  <title>Admin HRD — HC Information Center</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="admin-body">
+  <!-- Latar animatif: bola neon mengorbit (lihat js/motion.js) -->
+  <canvas id="bgCanvas" aria-hidden="true"></canvas>
+
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="brand">
+        <span class="brand-logo">HC</span>
+        <div>
+          <h1>Admin HRD</h1>
+          <p class="brand-sub" id="companySub"></p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <a href="index.html" class="btn btn-ghost">Lihat Portal</a>
+        <button class="btn btn-ghost hidden" id="btnLogout">Keluar</button>
+      </div>
+    </div>
+  </header>
+
+  <div id="demoBanner" class="demo-banner hidden">
+    MODE DEMO — login: <b>admin</b> / <b>demo123</b>. Perubahan hanya tersimpan sementara di browser.
+  </div>
+
+  <!-- ===== Login ===== -->
+  <section id="loginSection" class="login-wrap">
+    <div class="login-card">
+      <h2>Masuk Admin HC</h2>
+      <p class="hint">Kredensial disimpan di Script Properties Apps Script (ADMIN_USER &amp; ADMIN_PASS), bukan di kode.</p>
+      <label class="field">
+        <span>Username</span>
+        <input type="text" id="loginUser" autocomplete="username">
+      </label>
+      <label class="field">
+        <span>Password</span>
+        <input type="password" id="loginPass" autocomplete="current-password">
+      </label>
+      <p id="loginError" class="error-msg hidden"></p>
+      <button class="btn btn-primary btn-block" id="btnLogin">Masuk</button>
+    </div>
+  </section>
+
+  <!-- ===== Panel admin ===== -->
+  <main id="adminPanel" class="container hidden">
+    <div class="panel-head">
+      <div>
+        <h2>Kelola Informasi</h2>
+        <p class="meta-line" id="adminMeta"></p>
+      </div>
+      <button class="btn btn-primary" id="btnNew">+ Informasi Baru</button>
+    </div>
+
+    <div class="admin-filters">
+      <input type="search" id="adminSearch" placeholder="Cari judul...">
+      <select id="adminFilterStatus">
+        <option value="">Semua Status</option>
+        <option value="Published">Published</option>
+        <option value="Draft">Draft</option>
+      </select>
+      <select id="adminFilterCat">
+        <option value="">Semua Kategori</option>
+        <option>Pengumuman</option>
+        <option>Memo &amp; Surat Edaran</option>
+        <option>Learning &amp; Development</option>
+        <option>Kegiatan &amp; Agenda HC</option>
+        <option>HC Corner</option>
+      </select>
+    </div>
+
+    <div class="table-wrap">
+      <table class="admin-table" id="adminTable">
+        <thead>
+          <tr>
+            <th>Judul</th>
+            <th>Kategori</th>
+            <th>Status</th>
+            <th>Tayang</th>
+            <th>Baca</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="adminTableBody"></tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- ===== Form editor ===== -->
+  <div class="modal-backdrop hidden" id="formModal">
+    <div class="modal modal-lg" role="dialog" aria-modal="true">
+      <div class="modal-head">
+        <h2 id="formTitle">Informasi Baru</h2>
+        <button class="icon-btn" id="closeForm" aria-label="Tutup">✕</button>
+      </div>
+      <div class="modal-body">
+        <label class="field">
+          <span>Judul *</span>
+          <input type="text" id="fJudul" maxlength="300" placeholder="Contoh: Pengumuman Cuti Bersama Idul Fitri">
+        </label>
+        <div class="field-row">
+          <label class="field">
+            <span>Kategori</span>
+            <select id="fKategori">
+              <option>Pengumuman</option>
+              <option>Memo &amp; Surat Edaran</option>
+              <option>Learning &amp; Development</option>
+              <option>Kegiatan &amp; Agenda HC</option>
+              <option>HC Corner</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Tipe / Jenis Dokumen</span>
+            <select id="fTipe">
+              <option>Pengumuman Resmi</option>
+              <option>Surat Edaran</option>
+              <option>Memo Internal</option>
+              <option>Surat Pemberitahuan</option>
+              <option>Surat Keputusan</option>
+              <option>Jadwal Training</option>
+              <option>Materi Pembelajaran</option>
+              <option>Agenda</option>
+              <option>Artikel</option>
+              <option>FAQ</option>
+              <option>Lainnya</option>
+            </select>
+          </label>
+        </div>
+        <label class="field">
+          <span>Isi Informasi *</span>
+          <textarea id="fIsi" rows="9" placeholder="Tulis isi informasi. Tekan Enter dua kali untuk paragraf baru."></textarea>
+        </label>
+        <div class="field-row">
+          <label class="field">
+            <span>Tanggal Publikasi</span>
+            <input type="date" id="fTglPub">
+          </label>
+          <label class="field">
+            <span>Tanggal Kedaluwarsa (berhenti tayang)</span>
+            <input type="date" id="fTglExp">
+          </label>
+        </div>
+        <label class="field field-check">
+          <input type="checkbox" id="fPin">
+          <span>Pin di atas (informasi penting selalu tampil paling atas)</span>
+        </label>
+        <label class="field">
+          <span>Target Pembaca</span>
+          <select id="fTarget">
+            <option>Seluruh Karyawan</option>
+            <option>Manajemen</option>
+            <option>Divisi Tertentu</option>
+          </select>
+        </label>
+
+        <div class="upload-box">
+          <span>Lampiran (PDF, Word, gambar — maks. ±6 MB per file)</span>
+          <input type="file" id="fFile" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.gif,.webp">
+          <div id="attachmentList" class="attachment-list"></div>
+        </div>
+
+        <div class="form-actions">
+          <label class="field-check inline">
+            <input type="checkbox" id="fPublishNow" checked>
+            <span>Terbitkan sekarang (Published)</span>
+          </label>
+          <div>
+            <button class="btn btn-ghost" id="btnCancelForm">Batal</button>
+            <button class="btn btn-primary" id="btnSaveForm">Simpan</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Modal konfirmasi baca (admin view) ===== -->
+  <div class="modal-backdrop hidden" id="readsModal">
+    <div class="modal modal-lg" role="dialog" aria-modal="true">
+      <div class="modal-head">
+        <h2 id="readsTitle">Konfirmasi Baca</h2>
+        <button class="icon-btn" id="closeReads" aria-label="Tutup">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="table-wrap">
+          <table class="admin-table">
+            <thead><tr><th>Nama</th><th>NRP</th><th>Waktu</th></tr></thead>
+            <tbody id="readsBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/motion.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>
